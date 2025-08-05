@@ -1,11 +1,5 @@
 import { Book, Check, User } from 'lucide-react'
-import type {
-  GitHubRepo,
-  GitHubUser,
-  MeritItem,
-  SearchRepoResult,
-  SearchUserResult,
-} from '../types'
+import type { MeritItem, SearchRepoResult, SearchUserResult } from '../types'
 import { isGitHubUser } from '../types'
 
 interface SearchResultsProps {

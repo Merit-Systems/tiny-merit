@@ -1,7 +1,6 @@
-import { Book, Trash2, User } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import type { MeritItem } from '../types'
 import { isGitHubRepo, isGitHubUser } from '../types'
-import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { NumericInput } from './ui/numeric-input'
 
@@ -53,27 +52,23 @@ export function MeritItemsList({
                       </strong>
                     </div>
                   </div>
+                  <span className="text-xs text-muted-foreground">User</span>
                 </div>
               ) : isGitHubRepo(item) ? (
                 <div className="flex items-center gap-2">
-                  <Book className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  <img
+                    src={item.repo.owner?.avatar_url}
+                    alt={item.repo.owner?.login}
+                    className="w-5 h-5 rounded-full flex-shrink-0"
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <strong className="text-sm text-foreground truncate">
                         {item.repo.owner?.login}/{item.repo.name}
                       </strong>
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {item.repo.description || 'No description'}
-                    </div>
-                    <div className="flex gap-3 text-xs text-muted-foreground">
-                      {item.repo.language && (
-                        <span>📝 {item.repo.language}</span>
-                      )}
-                      <span>⭐ {item.repo.stargazers_count}</span>
-                      <span>🍴 {item.repo.forks_count}</span>
-                    </div>
                   </div>
+                  <span className="text-xs text-muted-foreground">Repo</span>
                 </div>
               ) : null}
             </div>
@@ -83,7 +78,9 @@ export function MeritItemsList({
                 <NumericInput
                   value={item.amount}
                   onChange={(value) => {
-                    const id = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
+                    const id = isGitHubUser(item)
+                      ? item.user.id.toString()
+                      : item.repo.id.toString()
                     onUpdateAmount(id, value)
                   }}
                   className="w-40 h-6 text-xs bg-background"
@@ -96,7 +93,9 @@ export function MeritItemsList({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  const id = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
+                  const id = isGitHubUser(item)
+                    ? item.user.id.toString()
+                    : item.repo.id.toString()
                   onRemoveItem(id)
                 }}
                 className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"

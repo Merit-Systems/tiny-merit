@@ -16,7 +16,7 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
   const handleCheckout = () => {
-    alert('Checkout')
+    window.open(generateCheckoutUrl(items), '_blank')
   }
 
   return (
@@ -38,24 +38,25 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
         Checkout with Merit
         <ExternalLink className="h-4 w-4" />
       </Button>
-    Debug URL: {generateCheckoutUrl(items)}
     </div>
   )
 }
 
 const generateCheckoutUrl = (items: MeritItem[]) => {
-  const encodedItems = items.map(item => {
-    const amount = item.amount.toFixed(2)
-    
-    if (isGitHubUser(item)) {
-      // For users: u_<github_user_id>_<amount>
-      return `u_${item.user.id}_${amount}`
-    } else if (isGitHubRepo(item)) {
-      // For repos: r_<github_repo_id>_<amount>
-      return `r_${item.repo.id}_${amount}`
-    }
-    return ''
-  }).filter(Boolean)
+  const encodedItems = items
+    .map((item) => {
+      const amount = item.amount.toFixed(2)
+
+      if (isGitHubUser(item)) {
+        // For users: u_<github_user_id>_<amount>
+        return `u_${item.user.id}_${amount}`
+      } else if (isGitHubRepo(item)) {
+        // For repos: r_<github_repo_id>_<amount>
+        return `r_${item.repo.id}_${amount}`
+      }
+      return ''
+    })
+    .filter(Boolean)
 
   const url = new URL('https://terminal.merit.systems/checkout')
   url.searchParams.set('items', JSON.stringify(encodedItems))
