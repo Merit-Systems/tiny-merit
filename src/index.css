@@ -1,0 +1,324 @@
+@import "tailwindcss";
+
+html {
+  @apply font-sans;
+}
+
+@layer base {
+  :root {
+    /* light mode color gradients, lightest to darkest */
+    /* 
+    255 255 255
+    241 242 237
+    223 226 217
+    177 178 175
+    140 140 140 
+    */
+
+    --background: 250 250 250;
+    --background-gradient: 255 255 255;
+    --navbar: 255 255 255;
+    --foreground: 14 14 14;
+    --card: 255 255 255;
+    --card-foreground: 14 14 14;
+    --popover: 250 250 248;
+    --popover-foreground: 14 14 14;
+    --muted: 223 226 217;
+    --muted-foreground: 14 14 14;
+
+    --accent: 250 250 248;
+    --accent-foreground: 14 14 14;
+    --destructive: 255 59 48;
+    --destructive-foreground: 238 240 232;
+    --primary: 205 27 33;
+    --primary-foreground: 238 241 231;
+    --secondary: 0 157 200;
+    --secondary-foreground: 250 250 248;
+
+    --border: 223 226 217;
+    --input: 255 255 255;
+    --input-foreground: 14 14 14;
+
+    --ring: 111 153 174;
+
+    --sidebar-background: 245 245 245;
+    --sidebar-foreground: 67 67 67;
+    --sidebar-primary: 26 26 26;
+    --sidebar-primary-foreground: 250 250 248;
+    --sidebar-accent: 245 245 245;
+    --sidebar-accent-foreground: 26 26 26;
+    --sidebar-border: 232 232 232;
+    --sidebar-ring: 66 153 225;
+
+    --chart-1: var(--primary); /* Primary color */
+    --chart-2: var(--secondary); /* Secondary color */
+    --chart-3: var(--accent); /* Accent color */
+    --chart-4: 255 204 0;
+    --chart-5: 255 149 0;
+
+    --face-border: 0 0 0;
+    --face-color: 250 250 248;
+
+    /* blue */
+    --inner-front: 1 153 174;
+    --inner-top: 1 111 119;
+    --inner-right: 2 79 81;
+
+    --diff-selection-background-color: rgb(180, 201, 185);
+    --diff-gutter-insert-background-color: rgb(192, 230, 193);
+    --diff-gutter-delete-background-color: rgb(232, 180, 184);
+    --diff-gutter-selected-background-color: rgb(168, 185, 175);
+    --diff-code-insert-background-color: rgb(185, 215, 188);
+    --diff-code-delete-background-color: rgb(217, 178, 183);
+    --diff-code-insert-edit-background-color: rgb(205, 224, 205);
+    --diff-code-delete-edit-background-color: rgb(227, 193, 197);
+    --diff-code-selected-background-color: rgb(186, 203, 191);
+    --diff-omit-gutter-line-color: rgb(217, 140, 145);
+
+    --diff-text-color: rgb(var(--foreground));
+    --diff-background-color: var(--card);
+    --diff-font-family: Consolas, Courier, monospace;
+    --diff-selection-text-color: var(--diff-text-color);
+    --diff-gutter-insert-text-color: var(--diff-text-color);
+    --diff-gutter-delete-text-color: var(--diff-text-color);
+    --diff-gutter-selected-text-color: var(--diff-text-color);
+    --diff-code-insert-text-color: var(--diff-text-color);
+    --diff-code-delete-text-color: var(--diff-text-color);
+    --diff-code-insert-edit-text-color: var(--diff-text-color);
+    --diff-code-delete-edit-text-color: var(--diff-text-color);
+    --diff-code-selected-text-color: var(--diff-text-color);
+
+    --radius: 0.5rem;
+
+    --brand-xlight-gray: 76 76 76;
+    --brand-light-gray: 51 51 51;
+    --brand-gray: 35 35 35;
+    --brand-dark-gray: 20 20 20;
+    --brand-xdark-gray: 0 0 0;
+
+    --brand-xlight-blue: 5 199 204;
+    --brand-light-blue: 2 178 191;
+    --brand-blue: 1 153 174;
+    --brand-dark-blue: 1 111 119;
+    --brand-xdark-blue: 2 79 81;
+
+    --brand-xlight-white: 255 255 255;
+    --brand-light-white: 241 242 237;
+    --brand-white: 223 226 217;
+    --brand-dark-white: 177 178 175;
+    --brand-xdark-white: 140 140 140;
+  }
+
+  .dark {
+    --background: 0 0 0;
+    --background-gradient: 0 0 0;
+    --foreground: 223 226 217;
+
+    --navbar: 18 18 18;
+
+    --card: 10 10 10;
+    --card-foreground: 241 242 237;
+
+    --popover: 28 28 30;
+    --popover-foreground: 242 242 242;
+    --primary: 205 27 33;
+    --primary-foreground: 238 241 231;
+
+    --secondary: 1 153 174;
+    --secondary-foreground: 222 226 211;
+
+    --muted: 28 28 28;
+    --muted-foreground: 200 200 200;
+
+    --accent: 128 102 111;
+    --accent-foreground: 222 226 211;
+
+    --destructive: 205 27 33;
+    --destructive-foreground: 238 241 231;
+
+    --border: 64 64 64;
+
+    --input: 42 42 42;
+    --ring: 111 153 174;
+
+    --face-border: 255 255 255;
+    --face-color: 0 0 0;
+
+    /* red */
+    --inner-front: 205 2 2;
+    --inner-top: 175 4 4;
+    --inner-right: 127 4 4;
+
+    --sidebar-background: 33 33 33;
+    --sidebar-foreground: 244 244 244;
+    --sidebar-primary: 41 121 255;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 41 41 41;
+    --sidebar-accent-foreground: 244 244 244;
+    --sidebar-border: 41 41 41;
+    --sidebar-ring: 66 153 255;
+
+    --chart-1: var(--primary); /* Primary color */
+    --chart-2: var(--secondary); /* Secondary color */
+    --chart-3: var(--accent); /* Accent color */
+    --chart-4: 255 182 193; /* Light Pink */
+    --chart-5: 123 104 238; /* Medium Slate Blue */
+
+    --diff-selection-background-color: rgb(59, 83, 100);
+    --diff-gutter-insert-background-color: rgb(61, 114, 71);
+    --diff-gutter-delete-background-color: rgb(122, 62, 72);
+    --diff-gutter-selected-background-color: rgb(78, 86, 96);
+    --diff-code-insert-background-color: rgb(70, 109, 80);
+    --diff-code-delete-background-color: rgb(128, 74, 84);
+    --diff-code-insert-edit-background-color: rgb(90, 138, 103);
+    --diff-code-delete-edit-background-color: rgb(167, 91, 103);
+    --diff-code-selected-background-color: rgb(92, 102, 114);
+    --diff-omit-gutter-line-color: rgb(167, 67, 60);
+
+    --diff-text-color: rgb(var(--foreground));
+    --diff-background-color: var(--card);
+    --diff-font-family: Consolas, Courier, monospace;
+    --diff-selection-text-color: var(--diff-text-color);
+    --diff-gutter-insert-text-color: var(--diff-text-color);
+    --diff-gutter-delete-text-color: var(--diff-text-color);
+    --diff-gutter-selected-text-color: var(--diff-text-color);
+    --diff-code-insert-text-color: var(--diff-text-color);
+    --diff-code-delete-text-color: var(--diff-text-color);
+    --diff-code-insert-edit-text-color: var(--diff-text-color);
+    --diff-code-delete-edit-text-color: var(--diff-text-color);
+    --diff-code-selected-text-color: var(--diff-text-color);
+    --radius: 0.5rem;
+
+    /* Scrollbar styles for dark mode */
+    --scrollbar-track: 42 42 42;
+    --scrollbar-thumb: 75 75 75;
+    --scrollbar-thumb-hover: 90 90 90;
+
+    /* Custom scrollbar */
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgb(var(--scrollbar-track));
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgb(var(--scrollbar-thumb));
+      border-radius: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgb(var(--scrollbar-thumb-hover));
+    }
+
+    /* Firefox */
+    scrollbar-color: rgb(var(--scrollbar-thumb)) rgb(var(--scrollbar-track));
+    scrollbar-width: thin;
+  }
+}
+
+@theme {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.7s ease-out forwards;
+  }
+
+  .slide-in-right {
+    animation: slideInRight 0.7s ease-out forwards;
+  }
+  @keyframes zoomIn {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .zoom-in {
+    animation: zoomIn 0.7s ease-out forwards;
+  }
+}
+
+@layer components {
+  #gradient-canvas,
+  [id^='gradient-canvas-button-'] {
+    width: 100%;
+    height: 100%;
+    --gradient-color-1: #cd0202;
+    --gradient-color-2: #232323;
+  }
+
+  .gradient-border-wrapper {
+    background-clip: padding-box;
+    border-radius: var(--radius);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
