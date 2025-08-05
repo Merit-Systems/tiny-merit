@@ -11,7 +11,11 @@ interface SearchSectionProps {
   existingItems: MeritItem[]
 }
 
-export function SearchSection({ onAddItem, onRemoveItem, existingItems }: SearchSectionProps) {
+export function SearchSection({
+  onAddItem,
+  onRemoveItem,
+  existingItems,
+}: SearchSectionProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userResults, setUserResults] = useState<SearchUserResult[]>([])
   const [repoResults, setRepoResults] = useState<SearchRepoResult[]>([])

@@ -27,7 +27,11 @@ function App() {
         Tiny Merit
       </h1>
 
-      <SearchSection onAddItem={addItem} onRemoveItem={removeItem} existingItems={items} />
+      <SearchSection
+        onAddItem={addItem}
+        onRemoveItem={removeItem}
+        existingItems={items}
+      />
 
       <MeritItemsList
         items={items}

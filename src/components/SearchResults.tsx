@@ -42,7 +42,7 @@ export function SearchResults({
 
   const handleItemClick = (result: SearchUserResult | SearchRepoResult) => {
     const existingItem = getExistingItem(result)
-    
+
     if (existingItem) {
       onRemoveItem(existingItem.id)
     } else {

@@ -10,7 +10,11 @@ interface MeritItemsListProps {
   onRemoveItem: (id: string) => void
 }
 
-export function MeritItemsList({ items, onUpdateAmount, onRemoveItem }: MeritItemsListProps) {
+export function MeritItemsList({
+  items,
+  onUpdateAmount,
+  onRemoveItem,
+}: MeritItemsListProps) {
   if (items.length === 0) {
     return (
       <div>
@@ -37,9 +41,7 @@ export function MeritItemsList({ items, onUpdateAmount, onRemoveItem }: MeritIte
               {isGitHubUser(item) ? (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm text-muted-foreground">
-                      User:
-                    </span>
+                    <span className="text-sm text-muted-foreground">User:</span>
                     <strong className="text-foreground">
                       @{item.username}
                     </strong>
@@ -48,7 +50,12 @@ export function MeritItemsList({ items, onUpdateAmount, onRemoveItem }: MeritIte
                       <Input
                         type="number"
                         value={item.amount}
-                        onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          onUpdateAmount(
+                            item.id,
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
                         className="w-20 h-7 text-sm"
                         min="0"
                         step="0.01"
@@ -82,9 +89,7 @@ export function MeritItemsList({ items, onUpdateAmount, onRemoveItem }: MeritIte
               ) : isGitHubRepo(item) ? (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm text-muted-foreground">
-                      Repo:
-                    </span>
+                    <span className="text-sm text-muted-foreground">Repo:</span>
                     <strong className="text-foreground">
                       {item.owner}/{item.name}
                     </strong>
@@ -93,7 +98,12 @@ export function MeritItemsList({ items, onUpdateAmount, onRemoveItem }: MeritIte
                       <Input
                         type="number"
                         value={item.amount}
-                        onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          onUpdateAmount(
+                            item.id,
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
                         className="w-20 h-7 text-sm"
                         min="0"
                         step="0.01"
