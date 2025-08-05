@@ -19,7 +19,7 @@ export function MeritItemsList({
     return (
       <div>
         <h2 className="mb-4 text-xl font-semibold text-foreground">
-          Receivers (0)
+          Payees (0)
         </h2>
         <p className="text-muted-foreground">No items added yet.</p>
       </div>
@@ -29,12 +29,12 @@ export function MeritItemsList({
   return (
     <div>
       <h2 className="mb-4 text-xl font-semibold text-foreground">
-        Receivers ({items.length})
+        Payees ({items.length})
       </h2>
       <div className="flex flex-col gap-1">
         {items.map((item) => (
           <div
-            key={item.id}
+            key={isGitHubUser(item) ? item.user.id : item.repo.id}
             className="flex items-center justify-between p-2 border border-border rounded bg-muted"
           >
             <div className="flex-1 min-w-0">

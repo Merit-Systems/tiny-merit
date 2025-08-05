@@ -15,17 +15,23 @@ function App() {
   }
 
   const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => {
-      const itemId = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
-      return itemId !== id
-    }))
+    setItems((prev) =>
+      prev.filter((item) => {
+        const itemId = isGitHubUser(item)
+          ? item.user.id.toString()
+          : item.repo.id.toString()
+        return itemId !== id
+      })
+    )
   }
 
   const updateItemAmount = (id: string, amount: number) => {
     console.log('App updateItemAmount called:', id, amount)
     setItems((prev) =>
       prev.map((item) => {
-        const itemId = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
+        const itemId = isGitHubUser(item)
+          ? item.user.id.toString()
+          : item.repo.id.toString()
         return itemId === id ? { ...item, amount } : item
       })
     )

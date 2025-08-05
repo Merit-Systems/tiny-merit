@@ -1,4 +1,10 @@
-import { forwardRef, useEffect, useRef, useImperativeHandle, useState } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  useState,
+} from 'react'
 import AutoNumeric from 'autonumeric'
 import { cn } from '../../lib/utils'
 
@@ -13,15 +19,18 @@ export interface NumericInputProps {
 }
 
 export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
-  ({ 
-    value, 
-    onChange, 
-    className, 
-    decimalPlaces = 2, 
-    minimumValue = 0, 
-    maximumValue = 999999999,
-    placeholder 
-  }, ref) => {
+  (
+    {
+      value,
+      onChange,
+      className,
+      decimalPlaces = 2,
+      minimumValue = 0,
+      maximumValue = 999999999,
+      placeholder,
+    },
+    ref
+  ) => {
     const inputRef = useRef<HTMLInputElement>(null)
     const autoNumericRef = useRef<AutoNumeric | null>(null)
     const [isInitialized, setIsInitialized] = useState(false)
@@ -37,26 +46,26 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           }
 
           autoNumericRef.current = new AutoNumeric(inputRef.current, {
-            digitGroupSeparator: ",",
-            decimalCharacter: ".",
+            digitGroupSeparator: ',',
+            decimalCharacter: '.',
             decimalPlaces,
-            currencySymbol: "",
+            currencySymbol: '',
             minimumValue,
             maximumValue,
             modifyValueOnWheel: false,
             formatOnPageLoad: false,
             unformatOnSubmit: true,
             watchExternalChanges: false,
-            emptyInputBehavior: "null",
-            overrideMinMaxLimits: "ceiling",
+            emptyInputBehavior: 'null',
+            overrideMinMaxLimits: 'ceiling',
             allowDecimalPadding: false,
-            decimalCharacterAlternative: ".",
+            decimalCharacterAlternative: '.',
             saveValueToSessionStorage: false,
             selectOnFocus: false,
-            caretPositionOnFocus: "end",
+            caretPositionOnFocus: 'end',
             noEventListeners: false,
             readOnly: false,
-            wheelOn: "focus",
+            wheelOn: 'focus',
             // Use AutoNumeric's built-in callbacks
             callBackEntered: () => {
               console.log('AutoNumeric callBackEntered')
@@ -67,7 +76,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
               console.log('AutoNumeric callBackEdited')
               const val = autoNumericRef.current?.getNumber() || 0
               handleChangeCallback(val)
-            }
+            },
           })
 
           // Set initial value without triggering events
@@ -89,7 +98,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
 
           // Add event listeners directly without timeout
           const inputElement = autoNumericRef.current.node()
-          
+
           // Test basic input event first
           const testHandler = (e: Event) => {
             console.log('Basic input event fired:', e.type)
@@ -98,11 +107,16 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
             if (target && target.value) {
               const rawValue = target.value.replace(/[^0-9.]/g, '') // Remove formatting
               const numValue = parseFloat(rawValue) || 0
-              console.log('Direct input value:', rawValue, '-> parsed:', numValue)
+              console.log(
+                'Direct input value:',
+                rawValue,
+                '-> parsed:',
+                numValue
+              )
               onChange(numValue)
             }
           }
-          
+
           // Listen to multiple events for real-time updates
           inputElement.addEventListener('input', testHandler)
           inputElement.addEventListener('input', handleChange)
@@ -110,10 +124,9 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           inputElement.addEventListener('change', handleChange)
           inputElement.addEventListener('autoNumeric:formatted', handleChange)
           inputElement.addEventListener('blur', handleChange)
-          
+
           console.log('AutoNumeric initialized with event listeners')
           setIsInitialized(true)
-
         } catch (error) {
           console.error('AutoNumeric initialization error:', error)
         }
@@ -137,7 +150,8 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
       if (autoNumericRef.current && isInitialized) {
         try {
           const currentValue = autoNumericRef.current.getNumber()
-          if (Math.abs(currentValue - value) > 0.001) { // Avoid precision issues
+          if (Math.abs(currentValue - value) > 0.001) {
+            // Avoid precision issues
             autoNumericRef.current.set(value, { triggerEvent: false })
           }
         } catch (e) {
@@ -152,7 +166,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         type="text"
         placeholder={placeholder}
         className={cn(
-          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
           className
         )}
       />
@@ -160,4 +174,4 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
   }
 )
 
-NumericInput.displayName = "NumericInput"
+NumericInput.displayName = 'NumericInput'
