@@ -48,7 +48,7 @@ export function SearchSection({
   return (
     <div className="mb-12 p-6 border border-border rounded-lg bg-card">
       <h2 className="mb-4 text-xl font-semibold text-card-foreground">
-        Search GitHub
+        Search GitHub for user / repositories to pay on Merit
       </h2>
       <div className="flex gap-2">
         <Input

@@ -6,6 +6,7 @@ import type {
   SearchRepoResult,
   SearchUserResult,
 } from '../types'
+import { isGitHubUser } from '../types'
 
 interface SearchResultsProps {
   userResults: SearchUserResult[]
@@ -22,47 +23,30 @@ export function SearchResults({
   onRemoveItem,
   existingItems,
 }: SearchResultsProps) {
+  console.log('SearchResults existingItems:', userResults, repoResults)
   const getExistingItem = (
     result: SearchUserResult | SearchRepoResult
   ): MeritItem | undefined => {
-    if ('login' in result) {
-      return existingItems.find(
-        (item) => 'username' in item && item.username === result.login
-      )
-    } else if ('owner' in result && result.owner && 'name' in result) {
-      return existingItems.find(
-        (item) =>
-          'owner' in item &&
-          item.owner === result.owner.login &&
-          item.name === result.name
-      )
-    }
-    return undefined
+    return existingItems.find((item) => {
+      if ('login' in result && isGitHubUser(item)) {
+        return item.user.id === result.id
+      } else if ('owner' in result && !isGitHubUser(item)) {
+        return item.repo.id === result.id
+      }
+      return false
+    })
   }
 
   const handleItemClick = (result: SearchUserResult | SearchRepoResult) => {
     const existingItem = getExistingItem(result)
 
     if (existingItem) {
-      onRemoveItem(existingItem.id)
+      onRemoveItem(result.id.toString())
     } else {
       if ('login' in result) {
-        const user: GitHubUser = {
-          id: crypto.randomUUID(),
-          username: result.login,
-          amount: 0,
-          isLoading: false,
-        }
-        onAddItem(user)
-      } else if ('owner' in result && result.owner && 'name' in result) {
-        const repo: GitHubRepo = {
-          id: crypto.randomUUID(),
-          owner: result.owner.login,
-          name: result.name,
-          amount: 0,
-          isLoading: false,
-        }
-        onAddItem(repo)
+        onAddItem({ user: result, amount: 0 })
+      } else {
+        onAddItem({ repo: result, amount: 0 })
       }
     }
   }
@@ -97,7 +81,7 @@ export function SearchResults({
                 {result.login}
               </span>
               {exists && (
-                <span className="text-xs text-muted-foreground ml-auto">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
                   <Check className="w-3 h-3 text-green-500" />
                 </span>
               )}
@@ -130,8 +114,8 @@ export function SearchResults({
                 {result.owner?.login}/{result.name}
               </span>
               {exists && (
-                <span className="text-xs text-muted-foreground ml-auto">
-                  <Check className="w-3 h-3 text-muted-foreground bg-green-500" />
+                <span className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                  <Check className="w-3 h-3 text-green-500" />
                 </span>
               )}
             </div>

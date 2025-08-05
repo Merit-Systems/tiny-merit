@@ -1,5 +1,8 @@
 import { Button } from './ui/button'
+import logoSvg from '../assets/logo.svg'
 import type { MeritItem } from '../types'
+import { isGitHubUser, isGitHubRepo } from '../types'
+import { ExternalLink } from 'lucide-react'
 
 interface CheckoutSectionProps {
   items: MeritItem[]
@@ -12,21 +15,49 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
+  const handleCheckout = () => {
+    alert('Checkout')
+  }
+
   return (
-    <div className="mt-8 p-6 border border-border rounded-lg bg-card">
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-foreground font-semibold">
-            Total Items: {items.length}
-          </p>
-          <p className="text-foreground font-bold text-lg">
-            Total Amount: ${totalAmount.toFixed(2)}
-          </p>
-        </div>
-        <Button size="lg" className="font-semibold">
-          Checkout with Merit
-        </Button>
-      </div>
+    <div className="mt-4 flex items-center justify-between">
+      <p className="text-xs text-muted-foreground">
+        {items.length} receivers for $
+        {totalAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </p>
+      <Button
+        className="flex items-center gap-2 border-foreground"
+        variant="outline"
+        disabled={items.length === 0 || totalAmount === 0}
+        onClick={handleCheckout}
+      >
+        <img src={logoSvg} alt="Merit" className="h-4 w-4" />
+        Checkout with Merit
+        <ExternalLink className="h-4 w-4" />
+      </Button>
+    Debug URL: {generateCheckoutUrl(items)}
     </div>
   )
+}
+
+const generateCheckoutUrl = (items: MeritItem[]) => {
+  const encodedItems = items.map(item => {
+    const amount = item.amount.toFixed(2)
+    
+    if (isGitHubUser(item)) {
+      // For users: u_<github_user_id>_<amount>
+      return `u_${item.user.id}_${amount}`
+    } else if (isGitHubRepo(item)) {
+      // For repos: r_<github_repo_id>_<amount>
+      return `r_${item.repo.id}_${amount}`
+    }
+    return ''
+  }).filter(Boolean)
+
+  const url = new URL('https://terminal.merit.systems/checkout')
+  url.searchParams.set('items', JSON.stringify(encodedItems))
+  return url.toString()
 }

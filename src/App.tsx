@@ -3,21 +3,31 @@ import { SearchSection } from './components/SearchSection'
 import { MeritItemsList } from './components/MeritItemsList'
 import { CheckoutSection } from './components/CheckoutSection'
 import type { MeritItem } from './types'
+import { isGitHubUser } from './types'
 
 function App() {
   const [items, setItems] = useState<MeritItem[]>([])
+
+  console.log('App items:', items)
 
   const addItem = (item: MeritItem) => {
     setItems((prev) => [...prev, item])
   }
 
   const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id))
+    setItems((prev) => prev.filter((item) => {
+      const itemId = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
+      return itemId !== id
+    }))
   }
 
   const updateItemAmount = (id: string, amount: number) => {
+    console.log('App updateItemAmount called:', id, amount)
     setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, amount } : item))
+      prev.map((item) => {
+        const itemId = isGitHubUser(item) ? item.user.id.toString() : item.repo.id.toString()
+        return itemId === id ? { ...item, amount } : item
+      })
     )
   }
 

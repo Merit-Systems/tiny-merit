@@ -17,30 +17,21 @@ export type SearchRepoResult = Awaited<
 >['data']['items'][0]
 
 export interface GitHubUser {
-  id: string
-  username: string
+  user: SearchUserResult
   amount: number
-  userData?: GitHubUserData
-  isLoading?: boolean
-  error?: string
 }
 
 export interface GitHubRepo {
-  id: string
-  owner: string
-  name: string
+  repo: SearchRepoResult
   amount: number
-  repoData?: GitHubRepoData
-  isLoading?: boolean
-  error?: string
 }
 
 export type MeritItem = GitHubUser | GitHubRepo
 
 export function isGitHubUser(item: MeritItem): item is GitHubUser {
-  return 'username' in item
+  return 'user' in item
 }
 
 export function isGitHubRepo(item: MeritItem): item is GitHubRepo {
-  return 'owner' in item && 'name' in item
+  return 'repo' in item
 }
