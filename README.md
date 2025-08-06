@@ -28,7 +28,8 @@ Merit exposes a dynamic checkout page that allows external applications to const
 
 Example:
 
-I want to pay 2 users and 1 repo: 
+I want to pay 2 users and 1 repo:
+
 ```
 user: 1234567890
 amount: 100
@@ -54,7 +55,6 @@ This link will open the Merit checkout page to confirm the payment.
 <p align="center">
   <img src="./public/checkout.png" alt="checkout link" style="max-width: 1400px; width: 100%;">
 </p>
-
 
 # Tiny Merit Demo
 
