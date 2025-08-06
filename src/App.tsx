@@ -36,7 +36,8 @@ function App() {
 
   return (
     <div className="mx-auto container p-8 font-sans">
-      <h1 className="text-center text-3xl font-bold text-foreground mb-8">
+      <h1 className="text-center text-3xl font-bold text-foreground mb-8 flex items-center justify-center gap-3">
+        <img src="/logo.svg" alt="Tiny Merit" className="w-10 h-10" />
         Tiny Merit
       </h1>
 
