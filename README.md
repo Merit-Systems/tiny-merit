@@ -1,69 +1,68 @@
-# React + TypeScript + Vite
+# Tiny Merit
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimal implementation of a web app interacting with the Merit protocol.
 
-Currently, two official plugins are available:
+## Concepts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1-Pass Payments
 
-## Expanding the ESLint configuration
+Merit Accounts are "counterfactual". This means that they exist before they are even created by the end user. In our context, this means that for every github id (both users and repos), there is already an account that can receive payments without any interaction from the receiving party.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+When payments are made through Merit to a GitHub user/repo, there are guarantees that Merit gives the payer that are essentially _bound_ to the payment.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Merit guarantees that all requisite tax filings / information is collected for the payee. (fulfilling the payers obligation)
+2. Merit guarantees that if the payee does not claim the payment, the payer can reclaim the payment.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+We call these 1-pass payments because the payer only needs to do a single 1 pass payment to the person they want to pay. There is no back and forth between the payer and the payee wrangling legal/tax and receiver bank/address information.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Github IDs
+
+The Merit protocol is designed to do 1-pass payments against any public unique identifier. In our case, we use GitHub's native identifiers and use their Oauth to prove ownership over these identifiers.
+
+GitHub User IDs: unique integer that permanently identifies a user. We prove ownership over these by using classic Oauth.
+GitHub Repo IDs: unique integer that permanently identifies a repo. We prove ownership over these by using the GitHub App installation flow [docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app).
+
+## Merit Checkout Links
+
+Merit exposes a dynamic checkout page that allows external applications to construct checkouts for a set of GitHub IDs. So external applications are responsible for collecting the GitHub IDs (directly from github or from their own database) and then constructing a checkout link that can be used to redirect the user to the Merit checkout page.
+
+Example:
+
+I want to pay 2 users and 1 repo: 
+```
+user: 1234567890
+amount: 100
+
+user: 9876543210
+amount: 100
+
+
+repo: 5555555555
+amount: 100
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This payment can be constructed as a checkout link:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```
+https://terminal.merit.systems/checkout?u_1234567890=100&u_9876543210=100&r_5555555555=100
+```
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Merit Checkout Page
+
+This link will open the Merit checkout page to confirm the payment.
+
+<p align="center">
+  <img src="./public/checkout.png" alt="checkout link" style="max-width: 1400px; width: 100%;">
+</p>
+
+
+# Tiny Merit Demo
+
+Tiny Merit shows a quick example of how easy it is to setup a checkout link.
+
+Install & run locally:
+
+```
+pnpm install
+pnpm run dev
 ```
