@@ -17,7 +17,6 @@ export function SearchResults({
   onRemoveItem,
   existingItems,
 }: SearchResultsProps) {
-  console.log('SearchResults existingItems:', userResults, repoResults)
   const getExistingItem = (
     result: SearchUserResult | SearchRepoResult
   ): MeritItem | undefined => {

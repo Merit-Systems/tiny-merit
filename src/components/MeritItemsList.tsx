@@ -2,7 +2,7 @@ import { Trash2 } from 'lucide-react'
 import type { MeritItem } from '../types'
 import { isGitHubRepo, isGitHubUser } from '../types'
 import { Button } from './ui/button'
-import { NumericInput } from './ui/numeric-input'
+import { MoneyInput } from './ui/numeric-input'
 
 interface MeritItemsListProps {
   items: MeritItem[]
@@ -74,19 +74,15 @@ export function MeritItemsList({
             </div>
             <div className="flex items-center gap-2 ml-2">
               <div className="flex items-center gap-1">
-                <span className="text-xs">$</span>
-                <NumericInput
-                  value={item.amount}
-                  onChange={(value) => {
+                <MoneyInput
+                  setAmount={(amount) => {
                     const id = isGitHubUser(item)
                       ? item.user.id.toString()
                       : item.repo.id.toString()
-                    onUpdateAmount(id, value)
+                    onUpdateAmount(id, amount)
                   }}
-                  className="w-40 h-6 text-xs bg-background"
+                  placeholder="Amount"
                   decimalPlaces={2}
-                  minimumValue={0}
-                  maximumValue={999999}
                 />
               </div>
               <Button

@@ -1,177 +1,99 @@
-import {
-  forwardRef,
-  useEffect,
-  useRef,
-  useImperativeHandle,
-  useState,
-} from 'react'
-import AutoNumeric from 'autonumeric'
-import { cn } from '../../lib/utils'
+import React, { useEffect, useRef } from 'react'
 
-export interface NumericInputProps {
-  value: number
-  onChange: (value: number) => void
-  className?: string
-  decimalPlaces?: number
-  minimumValue?: number
-  maximumValue?: number
+import AutoNumeric from 'autonumeric'
+
+import { cn } from '../../lib/utils'
+import { Input } from './input'
+
+interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+  setAmount: (amount: number) => void
+  initialAmount?: number
   placeholder?: string
+  prefixClassName?: string
+  className?: string
+  inputClassName?: string
+  isBalanceMax?: boolean
+  hideDollarSign?: boolean
+  decimalPlaces?: number
 }
 
-export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
-  (
-    {
-      value,
-      onChange,
-      className,
-      decimalPlaces = 2,
-      minimumValue = 0,
-      maximumValue = 999999999,
-      placeholder,
-    },
-    ref
-  ) => {
-    const inputRef = useRef<HTMLInputElement>(null)
-    const autoNumericRef = useRef<AutoNumeric | null>(null)
-    const [isInitialized, setIsInitialized] = useState(false)
+export const MoneyInput: React.FC<Props> = ({
+  setAmount,
+  initialAmount,
+  placeholder,
+  className,
+  inputClassName,
+  prefixClassName,
+  isBalanceMax,
+  hideDollarSign,
+  decimalPlaces = 2,
+  ...props
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const autoNumericRef = useRef<AutoNumeric | null>(null)
 
-    useImperativeHandle(ref, () => inputRef.current!)
+  useEffect(() => {
+    if (inputRef.current) {
+      const minimumValue = '0.00'
+      const maximumValue = '99999999999999.99'
 
-    useEffect(() => {
-      if (inputRef.current && !autoNumericRef.current) {
-        try {
-          const handleChangeCallback = (value: number) => {
-            console.log('AutoNumeric callback triggered:', value)
-            onChange(value || 0)
-          }
+      autoNumericRef.current = new AutoNumeric(inputRef.current, {
+        digitGroupSeparator: ',',
+        decimalCharacter: '.',
+        currencySymbol: '',
+        minimumValue,
+        decimalPlaces,
+        maximumValue,
+        modifyValueOnWheel: false,
+        formatOnPageLoad: true,
+        unformatOnSubmit: true,
+        watchExternalChanges: true,
+        emptyInputBehavior: 'focus',
+        overrideMinMaxLimits: 'invalid',
+        allowDecimalPadding: false,
+      })
 
-          autoNumericRef.current = new AutoNumeric(inputRef.current, {
-            digitGroupSeparator: ',',
-            decimalCharacter: '.',
-            decimalPlaces,
-            currencySymbol: '',
-            minimumValue,
-            maximumValue,
-            modifyValueOnWheel: false,
-            formatOnPageLoad: false,
-            unformatOnSubmit: true,
-            watchExternalChanges: false,
-            emptyInputBehavior: 'null',
-            overrideMinMaxLimits: 'ceiling',
-            allowDecimalPadding: false,
-            decimalCharacterAlternative: '.',
-            saveValueToSessionStorage: false,
-            selectOnFocus: false,
-            caretPositionOnFocus: 'end',
-            noEventListeners: false,
-            readOnly: false,
-            wheelOn: 'focus',
-            // Use AutoNumeric's built-in callbacks
-            callBackEntered: () => {
-              console.log('AutoNumeric callBackEntered')
-              const val = autoNumericRef.current?.getNumber() || 0
-              handleChangeCallback(val)
-            },
-            callBackEdited: () => {
-              console.log('AutoNumeric callBackEdited')
-              const val = autoNumericRef.current?.getNumber() || 0
-              handleChangeCallback(val)
-            },
-          })
+      // Add event listener for value changes
+      inputRef.current.addEventListener('autoNumeric:formatted', () => {
+        const value = autoNumericRef.current?.getNumber() || 0
+        setAmount(value)
+      })
+    }
 
-          // Set initial value without triggering events
-          if (value > 0) {
-            autoNumericRef.current.set(value, { triggerEvent: false })
-          }
-
-          const handleChange = () => {
-            if (autoNumericRef.current) {
-              try {
-                const numericValue = autoNumericRef.current.getNumber()
-                console.log('NumericInput onChange triggered:', numericValue)
-                onChange(numericValue || 0)
-              } catch (e) {
-                console.warn('AutoNumeric parsing error:', e)
-              }
-            }
-          }
-
-          // Add event listeners directly without timeout
-          const inputElement = autoNumericRef.current.node()
-
-          // Test basic input event first
-          const testHandler = (e: Event) => {
-            console.log('Basic input event fired:', e.type)
-            // Try to get value directly from input element as backup
-            const target = e.target as HTMLInputElement
-            if (target && target.value) {
-              const rawValue = target.value.replace(/[^0-9.]/g, '') // Remove formatting
-              const numValue = parseFloat(rawValue) || 0
-              console.log(
-                'Direct input value:',
-                rawValue,
-                '-> parsed:',
-                numValue
-              )
-              onChange(numValue)
-            }
-          }
-
-          // Listen to multiple events for real-time updates
-          inputElement.addEventListener('input', testHandler)
-          inputElement.addEventListener('input', handleChange)
-          inputElement.addEventListener('keyup', handleChange)
-          inputElement.addEventListener('change', handleChange)
-          inputElement.addEventListener('autoNumeric:formatted', handleChange)
-          inputElement.addEventListener('blur', handleChange)
-
-          console.log('AutoNumeric initialized with event listeners')
-          setIsInitialized(true)
-        } catch (error) {
-          console.error('AutoNumeric initialization error:', error)
-        }
+    return () => {
+      if (autoNumericRef.current) {
+        autoNumericRef.current.remove()
       }
+    }
+  }, [setAmount, isBalanceMax, decimalPlaces])
 
-      return () => {
-        if (autoNumericRef.current) {
-          try {
-            autoNumericRef.current.remove()
-          } catch (e) {
-            // Ignore cleanup errors
-          }
-          autoNumericRef.current = null
-        }
-        setIsInitialized(false)
-      }
-    }, [])
-
-    // Handle external value changes
-    useEffect(() => {
-      if (autoNumericRef.current && isInitialized) {
-        try {
-          const currentValue = autoNumericRef.current.getNumber()
-          if (Math.abs(currentValue - value) > 0.001) {
-            // Avoid precision issues
-            autoNumericRef.current.set(value, { triggerEvent: false })
-          }
-        } catch (e) {
-          // Ignore setting errors
-        }
-      }
-    }, [value, isInitialized])
-
-    return (
-      <input
+  return (
+    <div
+      className={cn(
+        'border-2 border-border rounded-md bg-card flex flex-row items-center focus-within:border-secondary transition-colors duration-200 h-fit overflow-hidden pr-1',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          'size-12 text-lg opacity-60 aspect-square h-full flex items-center justify-center bg-foreground/10',
+          prefixClassName,
+          hideDollarSign && 'hidden'
+        )}
+      >
+        $
+      </div>
+      <Input
+        {...props}
         ref={inputRef}
         type="text"
         placeholder={placeholder}
         className={cn(
-          'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-          className
+          'w-full bg-card border-none text-xl h-fit py-0 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 focus:border-none placeholder:text-muted-foreground/40',
+          inputClassName
         )}
+        defaultValue={initialAmount?.toString()}
       />
-    )
-  }
-)
-
-NumericInput.displayName = 'NumericInput'
+    </div>
+  )
+}

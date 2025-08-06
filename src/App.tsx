@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import { SearchSection } from './components/SearchSection'
-import { MeritItemsList } from './components/MeritItemsList'
 import { CheckoutSection } from './components/CheckoutSection'
+import { MeritItemsList } from './components/MeritItemsList'
+import { SearchSection } from './components/SearchSection'
 import type { MeritItem } from './types'
 import { isGitHubUser } from './types'
 
 function App() {
   const [items, setItems] = useState<MeritItem[]>([])
-
-  console.log('App items:', items)
 
   const addItem = (item: MeritItem) => {
     setItems((prev) => [...prev, item])
@@ -26,7 +24,6 @@ function App() {
   }
 
   const updateItemAmount = (id: string, amount: number) => {
-    console.log('App updateItemAmount called:', id, amount)
     setItems((prev) =>
       prev.map((item) => {
         const itemId = isGitHubUser(item)
