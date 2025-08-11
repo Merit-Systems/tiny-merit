@@ -4,13 +4,13 @@ import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
 
 // Context type
-interface MeritContextType {
+export interface MeritContextType {
   sdk: MeritSDK
   config: MeritSDKConfig
 }
 
 // Create the context
-const MeritContext = createContext<MeritContextType | null>(null)
+export const MeritContext = createContext<MeritContextType | null>(null)
 
 // Provider props
 interface MeritProviderProps {
@@ -37,7 +37,6 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
   )
 
   const sdk = useMemo(() => {
-    console.log('Creating Merit SDK with config:', meritConfig)
     return new MeritSDK(meritConfig)
   }, [meritConfig])
 
@@ -56,7 +55,7 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
   )
 }
 
-// Hook to use the Merit SDK
+// Base hook to use the Merit context
 export function useMerit(): MeritContextType {
   const context = useContext(MeritContext)
 
@@ -65,25 +64,4 @@ export function useMerit(): MeritContextType {
   }
 
   return context
-}
-
-// Hook to get just the SDK instance
-export function useMeritSDK(): MeritSDK {
-  const { sdk } = useMerit()
-  return sdk
-}
-
-// Hook for checkout operations
-export function useMeritCheckout() {
-  const { sdk } = useMerit()
-
-  return useMemo(
-    () => ({
-      generateCheckoutUrl: (
-        params: Parameters<typeof sdk.checkout.generateCheckoutUrl>[0]
-      ) => sdk.checkout.generateCheckoutUrl(params),
-      generateGroupId: () => sdk.checkout.generateGroupId(),
-    }),
-    [sdk]
-  )
 }

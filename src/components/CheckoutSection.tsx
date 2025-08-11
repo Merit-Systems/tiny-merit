@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import logoSvg from '../assets/logo.svg'
-import { useMeritCheckout } from '../lib/merit-provider'
+import { useMeritCheckoutWithSender } from '../lib/merit-provider'
 import type { MeritItem } from '../types'
 import { isGitHubRepo, isGitHubUser } from '../types'
 import { Button } from './ui/button'
@@ -10,7 +10,12 @@ interface CheckoutSectionProps {
 }
 
 export function CheckoutSection({ items }: CheckoutSectionProps) {
-  const { generateCheckoutUrl } = useMeritCheckout()
+  // Get sender ID from environment variable (you can also pass as prop or collect via UI)
+  const senderGithubId = import.meta.env.VITE_MERIT_SENDER_ID
+    ? parseInt(import.meta.env.VITE_MERIT_SENDER_ID)
+    : undefined
+
+  const { generateCheckoutUrl } = useMeritCheckoutWithSender(senderGithubId)
 
   if (items.length === 0) {
     return null
@@ -42,8 +47,16 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
 
       // Use the SDK to generate a checkout URL
       console.log('About to generate URL with items:', checkoutItems)
-      const checkoutUrl = generateCheckoutUrl({
-        items: checkoutItems,
+      console.log('Sender GitHub ID:', senderGithubId)
+
+      // Generate redirect URL (current page or custom URL)
+      const redirectUrl =
+        import.meta.env.VITE_MERIT_REDIRECT_URL || window.location.href
+
+      console.log('Redirect URL for account mismatch:', redirectUrl)
+
+      const checkoutUrl = generateCheckoutUrl(checkoutItems, {
+        redirectUrl,
       })
 
       console.log('Generated checkout URL:', checkoutUrl)
