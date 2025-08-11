@@ -10,7 +10,7 @@ interface CheckoutSectionProps {
 }
 
 export function CheckoutSection({ items }: CheckoutSectionProps) {
-  const { generateCheckoutUrl: generateSDKCheckoutUrl } = useMeritCheckout()
+  const { generateCheckoutUrl } = useMeritCheckout()
 
   if (items.length === 0) {
     return null
@@ -18,41 +18,39 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
-  const generateCheckoutUrlWithSDK = (items: MeritItem[]) => {
-    // Transform items into the format expected by the Merit SDK
-    const checkoutItems = items.map((item) => {
-      const amount = item.amount
-
-      if (isGitHubUser(item)) {
-        return {
-          type: 'user' as const,
-          id: item.user.id,
-          amount: amount,
-        }
-      } else if (isGitHubRepo(item)) {
-        return {
-          type: 'repo' as const,
-          id: item.repo.id,
-          amount: amount,
-        }
-      }
-      throw new Error('Unknown item type')
-    })
-
-    // Use the SDK to generate a checkout URL
-    return generateSDKCheckoutUrl({
-      items: checkoutItems,
-    })
-  }
-
   const handleCheckout = () => {
     try {
-      const checkoutUrl = generateCheckoutUrlWithSDK(items)
+      // Transform items into the format expected by the Merit SDK
+      const checkoutItems = items.map((item) => {
+        const amount = item.amount
+
+        if (isGitHubUser(item)) {
+          return {
+            type: 'user' as const,
+            id: item.user.id,
+            amount: amount,
+          }
+        } else if (isGitHubRepo(item)) {
+          return {
+            type: 'repo' as const,
+            id: item.repo.id,
+            amount: amount,
+          }
+        }
+        throw new Error('Unknown item type')
+      })
+
+      // Use the SDK to generate a checkout URL
+      console.log('About to generate URL with items:', checkoutItems)
+      const checkoutUrl = generateCheckoutUrl({
+        items: checkoutItems,
+      })
+
+      console.log('Generated checkout URL:', checkoutUrl)
       window.open(checkoutUrl, '_blank')
     } catch (error) {
       console.error('Failed to create checkout URL:', error)
-      // Fallback to manual URL generation
-      window.open(generateManualCheckoutUrl(items), '_blank')
+      alert(`Failed to create checkout URL: ${error}`)
     }
   }
 
@@ -77,25 +75,4 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
       </Button>
     </div>
   )
-}
-
-const generateManualCheckoutUrl = (items: MeritItem[]) => {
-  const encodedItems = items
-    .map((item) => {
-      const amount = item.amount.toFixed(2)
-
-      if (isGitHubUser(item)) {
-        // For users: u_<github_user_id>_<amount>
-        return `u_${item.user.id}_${amount}`
-      } else if (isGitHubRepo(item)) {
-        // For repos: r_<github_repo_id>_<amount>
-        return `r_${item.repo.id}_${amount}`
-      }
-      return ''
-    })
-    .filter(Boolean)
-
-  const url = new URL('https://terminal.merit.systems/checkout')
-  url.searchParams.set('items', JSON.stringify(encodedItems))
-  return url.toString()
 }

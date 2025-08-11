@@ -28,11 +28,18 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
         config.baseURL ||
         import.meta.env.VITE_MERIT_BASE_URL ||
         'https://api.merit.systems',
+      checkoutURL:
+        config.checkoutURL ||
+        import.meta.env.VITE_MERIT_CHECKOUT_URL ||
+        'https://terminal.merit.systems/checkout',
     }),
-    [config.apiKey, config.baseURL]
+    [config.apiKey, config.baseURL, config.checkoutURL]
   )
 
-  const sdk = useMemo(() => new MeritSDK(meritConfig), [meritConfig])
+  const sdk = useMemo(() => {
+    console.log('Creating Merit SDK with config:', meritConfig)
+    return new MeritSDK(meritConfig)
+  }, [meritConfig])
 
   const contextValue = useMemo(
     () => ({
@@ -72,35 +79,10 @@ export function useMeritCheckout() {
 
   return useMemo(
     () => ({
-      generateCheckoutUrl: sdk.checkout.generateCheckoutUrl.bind(sdk.checkout),
-      generateGroupId: sdk.checkout.generateGroupId.bind(sdk.checkout),
-    }),
-    [sdk]
-  )
-}
-
-// Hook for balance operations
-export function useMeritBalances() {
-  const { sdk } = useMerit()
-
-  return useMemo(
-    () => ({
-      getBalanceByLogin: sdk.balances.getBalanceByLogin.bind(sdk.balances),
-    }),
-    [sdk]
-  )
-}
-
-// Hook for payment operations
-export function useMeritPayments() {
-  const { sdk } = useMerit()
-
-  return useMemo(
-    () => ({
-      getPaymentsBySender: sdk.payments.getPaymentsBySender.bind(sdk.payments),
-      getPaymentsByReceiver: sdk.payments.getPaymentsByReceiver.bind(
-        sdk.payments
-      ),
+      generateCheckoutUrl: (
+        params: Parameters<typeof sdk.checkout.generateCheckoutUrl>[0]
+      ) => sdk.checkout.generateCheckoutUrl(params),
+      generateGroupId: () => sdk.checkout.generateGroupId(),
     }),
     [sdk]
   )
