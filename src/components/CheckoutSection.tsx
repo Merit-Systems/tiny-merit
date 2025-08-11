@@ -1,22 +1,59 @@
-import { Button } from './ui/button'
-import logoSvg from '../assets/logo.svg'
-import type { MeritItem } from '../types'
-import { isGitHubUser, isGitHubRepo } from '../types'
 import { ExternalLink } from 'lucide-react'
+import logoSvg from '../assets/logo.svg'
+import { useMeritCheckout } from '../lib/merit-provider'
+import type { MeritItem } from '../types'
+import { isGitHubRepo, isGitHubUser } from '../types'
+import { Button } from './ui/button'
 
 interface CheckoutSectionProps {
   items: MeritItem[]
 }
 
 export function CheckoutSection({ items }: CheckoutSectionProps) {
+  const { generateCheckoutUrl: generateSDKCheckoutUrl } = useMeritCheckout()
+
   if (items.length === 0) {
     return null
   }
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
+  const generateCheckoutUrlWithSDK = (items: MeritItem[]) => {
+    // Transform items into the format expected by the Merit SDK
+    const checkoutItems = items.map((item) => {
+      const amount = item.amount
+
+      if (isGitHubUser(item)) {
+        return {
+          type: 'user' as const,
+          id: item.user.id,
+          amount: amount,
+        }
+      } else if (isGitHubRepo(item)) {
+        return {
+          type: 'repo' as const,
+          id: item.repo.id,
+          amount: amount,
+        }
+      }
+      throw new Error('Unknown item type')
+    })
+
+    // Use the SDK to generate a checkout URL
+    return generateSDKCheckoutUrl({
+      items: checkoutItems,
+    })
+  }
+
   const handleCheckout = () => {
-    window.open(generateCheckoutUrl(items), '_blank')
+    try {
+      const checkoutUrl = generateCheckoutUrlWithSDK(items)
+      window.open(checkoutUrl, '_blank')
+    } catch (error) {
+      console.error('Failed to create checkout URL:', error)
+      // Fallback to manual URL generation
+      window.open(generateManualCheckoutUrl(items), '_blank')
+    }
   }
 
   return (
@@ -42,7 +79,7 @@ export function CheckoutSection({ items }: CheckoutSectionProps) {
   )
 }
 
-const generateCheckoutUrl = (items: MeritItem[]) => {
+const generateManualCheckoutUrl = (items: MeritItem[]) => {
   const encodedItems = items
     .map((item) => {
       const amount = item.amount.toFixed(2)

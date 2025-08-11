@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CheckoutSection } from './components/CheckoutSection'
 import { MeritItemsList } from './components/MeritItemsList'
 import { SearchSection } from './components/SearchSection'
+import { MeritProvider } from './lib/merit-provider'
 import type { MeritItem } from './types'
 import { isGitHubUser } from './types'
 
@@ -35,26 +36,28 @@ function App() {
   }
 
   return (
-    <div className="mx-auto container p-8 font-sans">
-      <h1 className="text-center text-3xl font-bold text-foreground mb-8 flex items-center justify-center gap-3">
-        <img src="/logo.svg" alt="Tiny Merit" className="w-10 h-10" />
-        Tiny Merit
-      </h1>
+    <MeritProvider>
+      <div className="mx-auto container p-8 font-sans">
+        <h1 className="text-center text-3xl font-bold text-foreground mb-8 flex items-center justify-center gap-3">
+          <img src="/logo.svg" alt="Tiny Merit" className="w-10 h-10" />
+          Tiny Merit
+        </h1>
 
-      <SearchSection
-        onAddItem={addItem}
-        onRemoveItem={removeItem}
-        existingItems={items}
-      />
+        <SearchSection
+          onAddItem={addItem}
+          onRemoveItem={removeItem}
+          existingItems={items}
+        />
 
-      <MeritItemsList
-        items={items}
-        onUpdateAmount={updateItemAmount}
-        onRemoveItem={removeItem}
-      />
+        <MeritItemsList
+          items={items}
+          onUpdateAmount={updateItemAmount}
+          onRemoveItem={removeItem}
+        />
 
-      <CheckoutSection items={items} />
-    </div>
+        <CheckoutSection items={items} />
+      </div>
+    </MeritProvider>
   )
 }
 
