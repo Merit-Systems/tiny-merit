@@ -1,4 +1,10 @@
 import type { OutgoingPayment, UserBalance } from '@merit-systems/sdk'
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from '@merit-systems/sdk'
 import { useEffect, useState } from 'react'
 import { useMeritBalances, useMeritPayments } from '../lib/merit-provider'
 import type { GitHubUserData } from '../types'
@@ -13,7 +19,7 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [sentPayments, setSentPayments] = useState<OutgoingPayment[]>([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<unknown | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [hasNext, setHasNext] = useState(false)
@@ -26,61 +32,53 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
   const senderGithubId = githubUser.id
   const githubLogin = githubUser.login
 
-  const handleApiError = (err: unknown): string => {
-    // Handle Merit SDK errors by checking properties and error names
-    if (err instanceof Error) {
-      // Check for Merit Error types by name and status
-      const errorName = err.constructor.name
-      const status = (err as any).status
-
-      // Debug logging to see what we're actually getting
-      // console.log('Error details:', {
-      //   name: errorName,
-      //   status: status,
-      //   message: err.message,
-      //   messageLength: err.message.length,
-      //   trimmedMessage: err.message.trim(),
-      //   fullError: err,
-      // })
-
-      // Check for 401 Unauthorized - multiple ways to detect it
-      if (
-        errorName === 'UnauthorizedError' ||
-        status === 401 ||
-        err.message.includes('401') ||
-        err.message.toLowerCase().includes('unauthorized') ||
-        err.message.toLowerCase().includes('invalid api key') ||
-        err.message.toLowerCase().includes('authentication')
-      ) {
-        return 'Invalid API key. Please check your Merit API key in Account Settings.'
+  const getErrorInfo = (err: unknown) => {
+    if (err instanceof UnauthorizedError) {
+      return {
+        title: 'Authentication Error',
+        message:
+          'Invalid API key. Please check your Merit API key in Account Settings.',
+        showHint: true,
       }
-
-      // Check for MeritError with status 0 or empty message (likely invalid API key causing request to fail)
-      if (errorName === 'MeritError' && (status === 0 || !err.message.trim())) {
-        return 'Invalid API key. Please check your Merit API key in Account Settings.'
-      }
-
-      // Check for 400 Bad Request
-      if (errorName === 'BadRequestError' || status === 400) {
-        return `Bad request: ${err.message}`
-      }
-
-      // Check for 404 Not Found
-      if (errorName === 'NotFoundError' || status === 404) {
-        return `Resource not found: ${err.message}`
-      }
-
-      // Check for 500 Internal Server Error
-      if (errorName === 'InternalServerError' || status >= 500) {
-        return `Server error: ${err.message}`
-      }
-
-      // Generic error message fallback
-      return err.message
     }
 
-    // console.log('Non-Error object:', err)
-    return 'An unexpected error occurred'
+    if (err instanceof BadRequestError) {
+      return {
+        title: 'Request Error',
+        message: `Bad request: ${err.message}`,
+        showHint: false,
+      }
+    }
+
+    if (err instanceof NotFoundError) {
+      return {
+        title: 'Not Found',
+        message: `Resource not found: ${err.message}`,
+        showHint: false,
+      }
+    }
+
+    if (err instanceof InternalServerError) {
+      return {
+        title: 'Server Error',
+        message: `Server error: ${err.message}`,
+        showHint: false,
+      }
+    }
+
+    if (err instanceof Error) {
+      return {
+        title: 'Error',
+        message: err.message,
+        showHint: false,
+      }
+    }
+
+    return {
+      title: 'Error',
+      message: 'An unexpected error occurred',
+      showHint: false,
+    }
   }
 
   const refreshPayments = async () => {
@@ -95,7 +93,7 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
           setBalance(balanceData)
         } catch (err) {
           console.warn('Could not fetch balance:', err)
-          setError(handleApiError(err))
+          setError(err)
           return
         }
       }
@@ -111,11 +109,11 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
         setHasNext(sentData.has_next)
       } catch (err) {
         console.warn('Could not fetch sent payments:', err)
-        setError(handleApiError(err))
+        setError(err)
         return
       }
     } catch (err) {
-      setError(handleApiError(err))
+      setError(err)
     } finally {
       setIsRefreshing(false)
     }
@@ -134,7 +132,7 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
             setBalance(balanceData)
           } catch (err) {
             console.warn('Could not fetch balance:', err)
-            setError(handleApiError(err))
+            setError(err)
             return
           }
         }
@@ -150,11 +148,11 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
           setHasNext(sentData.has_next)
         } catch (err) {
           console.warn('Could not fetch sent payments:', err)
-          setError(handleApiError(err))
+          setError(err)
           return
         }
       } catch (err) {
-        setError(handleApiError(err))
+        setError(err)
       } finally {
         setLoading(false)
       }
@@ -303,17 +301,17 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-red-600 font-medium">
-                      {error.includes('Invalid API key')
-                        ? 'Authentication Error'
-                        : error.includes('Bad request')
-                          ? 'Request Error'
-                          : error.includes('Resource not found')
-                            ? 'Not Found'
-                            : error.includes('Server error')
-                              ? 'Server Error'
-                              : 'Error'}
+                      {getErrorInfo(error).title}
                     </p>
-                    <p className="text-sm text-red-600 mt-1">{error}</p>
+                    <p className="text-sm text-red-600 mt-1">
+                      {getErrorInfo(error).message}
+                    </p>
+                    {getErrorInfo(error).showHint && (
+                      <p className="text-xs text-red-500 mt-2">
+                        💡 Go to Account Settings above to update your Merit API
+                        key
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : (
