@@ -1,5 +1,6 @@
 // Export the main provider and context
-export { MeritProvider, useMerit } from './context'
+export { MeritProvider } from './context'
+export { useMerit } from './use-merit'
 
 // Export all hooks
 export { useMeritBalances } from './use-merit-balances'
@@ -9,4 +10,4 @@ export { useMeritPayments } from './use-merit-payments'
 export { useMeritSDK } from './use-merit-sdk'
 
 // Re-export types
-export type { MeritContextType } from './context'
+export type { MeritContextType } from './types'

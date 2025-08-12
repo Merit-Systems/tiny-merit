@@ -30,7 +30,7 @@ Example:
 
 I want to pay 2 users and 1 repo:
 
-```
+```text
 user: 1234567890
 amount: 100
 
@@ -67,17 +67,15 @@ const checkoutUrl = sdk.checkout.generateCheckoutUrl({
 
 This link will open the Merit checkout page to confirm the payment.
 
-<p align="center">
-  <img src="./public/checkout.png" alt="checkout link" style="max-width: 1400px; width: 100%;">
-</p>
+![Merit Checkout Page](./public/checkout.png)
 
-# Tiny Merit Demo
+## Demo
 
 Tiny Merit shows a quick example of how easy it is to setup a checkout link.
 
 Install & run locally:
 
-```
+```bash
 pnpm install
 pnpm run dev
 ```

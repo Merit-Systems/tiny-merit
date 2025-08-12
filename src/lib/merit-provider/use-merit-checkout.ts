@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useMerit } from './context'
+import { useMerit } from './use-merit'
 
 // Hook for basic checkout operations
 export function useMeritCheckout() {

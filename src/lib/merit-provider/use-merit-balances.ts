@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useMerit } from './context'
+import { useMerit } from './use-merit'
 
 // Hook for balance operations
 export function useMeritBalances() {

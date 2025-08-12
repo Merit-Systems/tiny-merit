@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { searchGitHubUsers } from '../github'
-import type { GitHubUserData } from '../types'
+import type { GitHubUserData, SearchUserResult } from '../types'
 import { Card } from './ui/card'
 
 interface UserSettingsProps {
@@ -9,7 +9,7 @@ interface UserSettingsProps {
 
 export function UserSettings({ onUserChange }: UserSettingsProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<SearchUserResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedUser, setSelectedUser] = useState<GitHubUserData | null>(null)
   const [showResults, setShowResults] = useState(false)
@@ -50,17 +50,21 @@ export function UserSettings({ onUserChange }: UserSettingsProps) {
     }
   }
 
-  const handleSelectUser = (user: any) => {
-    setSelectedUser(user)
+  const handleSelectUser = (user: SearchUserResult) => {
+    // Use type assertion to convert SearchUserResult to GitHubUserData
+    // Both types represent GitHub user data, just with slightly different optional field handling
+    const convertedUser = user as GitHubUserData
+    
+    setSelectedUser(convertedUser)
     setSearchQuery('')
     setShowResults(false)
     setSearchResults([])
 
     // Save to localStorage
-    localStorage.setItem('merit-sender-user', JSON.stringify(user))
+    localStorage.setItem('merit-sender-user', JSON.stringify(convertedUser))
 
     // Notify parent
-    onUserChange(user)
+    onUserChange(convertedUser)
   }
 
   const handleClearUser = () => {

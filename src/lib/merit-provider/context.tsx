@@ -1,16 +1,8 @@
-import type { MeritSDKConfig } from '@merit-systems/sdk'
-import { MeritSDK } from '@merit-systems/sdk'
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useMemo } from 'react'
-
-// Context type
-export interface MeritContextType {
-  sdk: MeritSDK
-  config: MeritSDKConfig
-}
-
-// Create the context
-export const MeritContext = createContext<MeritContextType | null>(null)
+import { MeritSDK } from '@merit-systems/sdk'
+import type { MeritSDKConfig } from '@merit-systems/sdk'
+import { MeritContext } from './merit-context'
 
 // Provider props
 interface MeritProviderProps {
@@ -53,15 +45,4 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
       {children}
     </MeritContext.Provider>
   )
-}
-
-// Base hook to use the Merit context
-export function useMerit(): MeritContextType {
-  const context = useContext(MeritContext)
-
-  if (!context) {
-    throw new Error('useMerit must be used within a MeritProvider')
-  }
-
-  return context
 }

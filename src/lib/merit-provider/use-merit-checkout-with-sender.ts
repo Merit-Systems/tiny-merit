@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useMerit } from './context'
+import { useMerit } from './use-merit'
 
 // Hook for checkout operations with automatic sender ID and redirect support
 export function useMeritCheckoutWithSender(senderGithubId?: number) {
