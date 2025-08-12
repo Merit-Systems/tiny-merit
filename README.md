@@ -41,10 +41,26 @@ repo: 5555555555
 amount: 100
 ```
 
-This payment can be constructed as a checkout link:
+This payment can be constructed as a checkout link using the Merit SDK:
 
-```
-https://terminal.merit.systems/checkout?u_1234567890=100&u_9876543210=100&r_5555555555=100
+```javascript
+import { MeritSDK } from '@merit-systems/sdk'
+
+const sdk = new MeritSDK({
+  apiKey: 'your-api-key',
+  checkoutURL: 'https://terminal.merit.systems/checkout'
+})
+
+const checkoutUrl = sdk.checkout.generateCheckoutUrl({
+  items: [
+    { type: 'user', id: 1234567890, amount: 100 },
+    { type: 'user', id: 9876543210, amount: 100 },
+    { type: 'repo', id: 5555555555, amount: 100 }
+  ],
+  senderGithubId: 24497652 // optional: your GitHub ID
+})
+
+// Generated URL will be properly formatted for the Merit checkout page
 ```
 
 ## Merit Checkout Page

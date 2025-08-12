@@ -1,6 +1,11 @@
+import { useState } from 'react'
+import type { GitHubUserData } from '../types'
 import { UserPaymentsSection } from './UserPaymentsSection'
+import { UserSettings } from './UserSettings'
 
 export function PaymentHistoryTab() {
+  const [selectedUser, setSelectedUser] = useState<GitHubUserData | null>(null)
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex-shrink-0 mb-6">
@@ -10,8 +15,10 @@ export function PaymentHistoryTab() {
         </p>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <UserPaymentsSection />
+      <div className="flex-1 min-h-0 space-y-4">
+        <UserSettings onUserChange={setSelectedUser} />
+
+        {selectedUser && <UserPaymentsSection githubUser={selectedUser} />}
       </div>
     </div>
   )

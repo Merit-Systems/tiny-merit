@@ -1,10 +1,15 @@
 import type { OutgoingPayment, UserBalance } from '@merit-systems/sdk'
 import { useEffect, useState } from 'react'
 import { useMeritBalances, useMeritPayments } from '../lib/merit-provider'
+import type { GitHubUserData } from '../types'
 import { PaymentGroups } from './PaymentGroups'
 import { Card } from './ui/card'
 
-export function UserPaymentsSection() {
+interface UserPaymentsSectionProps {
+  githubUser: GitHubUserData
+}
+
+export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [sentPayments, setSentPayments] = useState<OutgoingPayment[]>([])
   const [loading, setLoading] = useState(false)
@@ -17,17 +22,11 @@ export function UserPaymentsSection() {
   const { getUserBalanceByLogin } = useMeritBalances()
   const { getPaymentsBySender } = useMeritPayments()
 
-  // Get sender ID from environment variable
-  const senderGithubId = import.meta.env.VITE_MERIT_SENDER_ID
-    ? parseInt(import.meta.env.VITE_MERIT_SENDER_ID)
-    : undefined
-
-  // Get GitHub login from environment variable
-  const githubLogin = import.meta.env.VITE_MERIT_SENDER_LOGIN
+  // Use the provided GitHub user
+  const senderGithubId = githubUser.id
+  const githubLogin = githubUser.login
 
   const refreshPayments = async () => {
-    if (!senderGithubId) return
-
     setIsRefreshing(true)
     setError(null)
 
@@ -62,10 +61,6 @@ export function UserPaymentsSection() {
   }
 
   useEffect(() => {
-    if (!senderGithubId) {
-      return
-    }
-
     const fetchUserData = async () => {
       setLoading(true)
       setError(null)
@@ -111,22 +106,9 @@ export function UserPaymentsSection() {
     getPaymentsBySender,
   ])
 
-  if (!senderGithubId) {
-    return (
-      <Card className="p-4 mt-6">
-        <h2 className="text-lg font-semibold mb-2">Your Merit Activity</h2>
-        <p className="text-sm text-muted-foreground">
-          Set VITE_MERIT_SENDER_ID in your environment to view your payments and
-          balance.
-        </p>
-      </Card>
-    )
-  }
-
   if (loading) {
     return (
-      <Card className="p-4 mt-6">
-        <h2 className="text-lg font-semibold mb-2">Your Merit Activity</h2>
+      <Card className="p-4">
         <p className="text-sm text-muted-foreground">Loading...</p>
       </Card>
     )
@@ -139,14 +121,14 @@ export function UserPaymentsSection() {
         <Card className="p-6">
           <div className="flex items-center gap-4">
             <img
-              src={`https://github.com/${balance.login}.png?size=64`}
-              alt={balance.login}
+              src={githubUser.avatar_url}
+              alt={githubUser.login}
               className="w-16 h-16 rounded-full ring-2 ring-gray-200"
             />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  @{balance.login}
+                  @{githubUser.login}
                 </h3>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
                   Merit Account
@@ -157,17 +139,6 @@ export function UserPaymentsSection() {
               </p>
               <p className="text-sm text-gray-500">Available Balance</p>
             </div>
-          </div>
-        </Card>
-      )}
-
-      {!balance && !githubLogin && (
-        <Card className="p-6">
-          <div className="text-center py-4">
-            <p className="text-gray-500 mb-2">Merit Balance</p>
-            <p className="text-sm text-gray-400">
-              Set VITE_MERIT_SENDER_LOGIN to view your balance
-            </p>
           </div>
         </Card>
       )}
