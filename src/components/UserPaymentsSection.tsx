@@ -306,12 +306,6 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
                     <p className="text-sm text-red-600 mt-1">
                       {getErrorInfo(error).message}
                     </p>
-                    {getErrorInfo(error).showHint && (
-                      <p className="text-xs text-red-500 mt-2">
-                        💡 Go to Account Settings above to update your Merit API
-                        key
-                      </p>
-                    )}
                   </div>
                 </div>
               ) : (
