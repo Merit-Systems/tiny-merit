@@ -1,39 +1,21 @@
-import { useState } from 'react'
-import { CheckoutSection } from './components/CheckoutSection'
-import { MeritItemsList } from './components/MeritItemsList'
-import { SearchSection } from './components/SearchSection'
+import { PayLinksTab } from './components/PayLinksTab'
+import { PaymentHistoryTab } from './components/PaymentHistoryTab'
+import { Tabs } from './components/ui/tabs'
 import { MeritProvider } from './lib/merit-provider'
-import type { MeritItem } from './types'
-import { isGitHubUser } from './types'
 
 function App() {
-  const [items, setItems] = useState<MeritItem[]>([])
-
-  const addItem = (item: MeritItem) => {
-    setItems((prev) => [...prev, item])
-  }
-
-  const removeItem = (id: string) => {
-    setItems((prev) =>
-      prev.filter((item) => {
-        const itemId = isGitHubUser(item)
-          ? item.user.id.toString()
-          : item.repo.id.toString()
-        return itemId !== id
-      })
-    )
-  }
-
-  const updateItemAmount = (id: string, amount: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        const itemId = isGitHubUser(item)
-          ? item.user.id.toString()
-          : item.repo.id.toString()
-        return itemId === id ? { ...item, amount } : item
-      })
-    )
-  }
+  const tabs = [
+    {
+      id: 'pay-links',
+      label: 'Pay Links',
+      content: <PayLinksTab />,
+    },
+    {
+      id: 'payment-history',
+      label: 'Payment History',
+      content: <PaymentHistoryTab />,
+    },
+  ]
 
   return (
     <MeritProvider>
@@ -43,19 +25,7 @@ function App() {
           Tiny Merit
         </h1>
 
-        <SearchSection
-          onAddItem={addItem}
-          onRemoveItem={removeItem}
-          existingItems={items}
-        />
-
-        <MeritItemsList
-          items={items}
-          onUpdateAmount={updateItemAmount}
-          onRemoveItem={removeItem}
-        />
-
-        <CheckoutSection items={items} />
+        <Tabs tabs={tabs} defaultTab="pay-links" />
       </div>
     </MeritProvider>
   )

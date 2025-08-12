@@ -1,0 +1,267 @@
+import type { OutgoingPayment, UserBalance } from '@merit-systems/sdk'
+import { useEffect, useState } from 'react'
+import { useMeritBalances, useMeritPayments } from '../lib/merit-provider'
+import { PaymentGroups } from './PaymentGroups'
+import { Card } from './ui/card'
+
+export function UserPaymentsSection() {
+  const [balance, setBalance] = useState<UserBalance | null>(null)
+  const [sentPayments, setSentPayments] = useState<OutgoingPayment[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasNext, setHasNext] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const { getUserBalanceByLogin } = useMeritBalances()
+  const { getPaymentsBySender } = useMeritPayments()
+
+  // Get sender ID from environment variable
+  const senderGithubId = import.meta.env.VITE_MERIT_SENDER_ID
+    ? parseInt(import.meta.env.VITE_MERIT_SENDER_ID)
+    : undefined
+
+  // Get GitHub login from environment variable
+  const githubLogin = import.meta.env.VITE_MERIT_SENDER_LOGIN
+
+  const refreshPayments = async () => {
+    if (!senderGithubId) return
+
+    setIsRefreshing(true)
+    setError(null)
+
+    try {
+      // Fetch balance if we have GitHub login
+      if (githubLogin) {
+        try {
+          const balanceData = await getUserBalanceByLogin(githubLogin)
+          setBalance(balanceData)
+        } catch (err) {
+          console.warn('Could not fetch balance:', err)
+        }
+      }
+
+      // Fetch sent payments
+      try {
+        const sentData = await getPaymentsBySender(senderGithubId, {
+          page_size: 20,
+          page: currentPage,
+        })
+        setSentPayments(sentData.items)
+        setTotalCount(sentData.total_count)
+        setHasNext(sentData.has_next)
+      } catch (err) {
+        console.warn('Could not fetch sent payments:', err)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch user data')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!senderGithubId) {
+      return
+    }
+
+    const fetchUserData = async () => {
+      setLoading(true)
+      setError(null)
+
+      try {
+        // Fetch balance if we have GitHub login
+        if (githubLogin) {
+          try {
+            const balanceData = await getUserBalanceByLogin(githubLogin)
+            setBalance(balanceData)
+          } catch (err) {
+            console.warn('Could not fetch balance:', err)
+          }
+        }
+
+        // Fetch sent payments
+        try {
+          const sentData = await getPaymentsBySender(senderGithubId, {
+            page_size: 20,
+            page: currentPage,
+          })
+          setSentPayments(sentData.items)
+          setTotalCount(sentData.total_count)
+          setHasNext(sentData.has_next)
+        } catch (err) {
+          console.warn('Could not fetch sent payments:', err)
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch user data'
+        )
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [
+    senderGithubId,
+    githubLogin,
+    currentPage,
+    getUserBalanceByLogin,
+    getPaymentsBySender,
+  ])
+
+  if (!senderGithubId) {
+    return (
+      <Card className="p-4 mt-6">
+        <h2 className="text-lg font-semibold mb-2">Your Merit Activity</h2>
+        <p className="text-sm text-muted-foreground">
+          Set VITE_MERIT_SENDER_ID in your environment to view your payments and
+          balance.
+        </p>
+      </Card>
+    )
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-4 mt-6">
+        <h2 className="text-lg font-semibold mb-2">Your Merit Activity</h2>
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="mt-6 space-y-4">
+      <h2 className="text-lg font-semibold">Your Merit Activity</h2>
+
+      {/* Balance Section */}
+      <Card className="p-6">
+        {balance ? (
+          <div className="flex items-center gap-4">
+            <img
+              src={`https://github.com/${balance.login}.png?size=64`}
+              alt={balance.login}
+              className="w-16 h-16 rounded-full ring-2 ring-gray-200"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  @{balance.login}
+                </h3>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                  Merit Account
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">
+                {balance.balance.formatted}
+              </p>
+              <p className="text-sm text-gray-500">Available Balance</p>
+            </div>
+          </div>
+        ) : githubLogin ? (
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse" />
+            <div>
+              <p className="text-gray-500">Loading your Merit balance...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-gray-500 mb-2">Merit Balance</p>
+            <p className="text-sm text-gray-400">
+              Set VITE_MERIT_SENDER_LOGIN to view your balance
+            </p>
+          </div>
+        )}
+      </Card>
+
+      {/* Sent Payments */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-medium">Recent Sent Payments</h3>
+          <div className="flex items-center gap-3">
+            {totalCount > 0 && (
+              <p className="text-xs text-gray-500">
+                {totalCount} total payments
+              </p>
+            )}
+            <button
+              onClick={refreshPayments}
+              disabled={isRefreshing || loading}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isRefreshing ? (
+                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              )}
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
+        </div>
+
+        {sentPayments.length > 0 ? (
+          <>
+            <PaymentGroups payments={sentPayments} />
+
+            {/* Pagination Controls */}
+            {totalCount > 20 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>Page {currentPage}</span>
+                  <span>•</span>
+                  <span>
+                    Showing {(currentPage - 1) * 20 + 1}-
+                    {Math.min(currentPage * 20, totalCount)} of {totalCount}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={!hasNext}
+                  className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No sent payments found
+          </p>
+        )}
+      </Card>
+
+      {error && (
+        <Card className="p-4 border-red-200 bg-red-50">
+          <p className="text-sm text-red-600">Error: {error}</p>
+        </Card>
+      )}
+    </div>
+  )
+}

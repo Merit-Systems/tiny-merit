@@ -7,7 +7,18 @@ export function useMeritBalances() {
 
   return useMemo(
     () => ({
-      getBalanceByLogin: sdk.balances.getBalanceByLogin.bind(sdk.balances),
+      getUserBalanceByLogin: sdk.balances.getUserBalanceByLogin.bind(
+        sdk.balances
+      ),
+      getUserBalanceByGithubId: sdk.balances.getUserBalanceByGithubId.bind(
+        sdk.balances
+      ),
+      getRepoBalanceByName: sdk.balances.getRepoBalanceByName.bind(
+        sdk.balances
+      ),
+      getRepoBalanceByRepoId: sdk.balances.getRepoBalanceByRepoId.bind(
+        sdk.balances
+      ),
     }),
     [sdk]
   )

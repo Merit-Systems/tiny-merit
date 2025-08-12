@@ -1,5 +1,5 @@
-import type { MeritSDKConfig } from '@rsproule/merit-sdk-test'
-import { MeritSDK } from '@rsproule/merit-sdk-test'
+import type { MeritSDKConfig } from '@merit-systems/sdk'
+import { MeritSDK } from '@merit-systems/sdk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
 
@@ -27,7 +27,7 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
       baseURL:
         config.baseURL ||
         import.meta.env.VITE_MERIT_BASE_URL ||
-        'https://api.merit.systems',
+        (import.meta.env.DEV ? '/api' : 'https://api.merit.systems'), // Use proxy in development
       checkoutURL:
         config.checkoutURL ||
         import.meta.env.VITE_MERIT_CHECKOUT_URL ||

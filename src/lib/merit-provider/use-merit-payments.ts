@@ -8,9 +8,6 @@ export function useMeritPayments() {
   return useMemo(
     () => ({
       getPaymentsBySender: sdk.payments.getPaymentsBySender.bind(sdk.payments),
-      getPaymentsByReceiver: sdk.payments.getPaymentsByReceiver.bind(
-        sdk.payments
-      ),
     }),
     [sdk]
   )
