@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
-import type { ReactNode } from 'react'
-import { MeritSDK } from '@merit-systems/sdk'
 import type { MeritSDKConfig } from '@merit-systems/sdk'
+import { MeritSDK } from '@merit-systems/sdk'
+import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { MeritContext } from './merit-context'
 
 // Provider props

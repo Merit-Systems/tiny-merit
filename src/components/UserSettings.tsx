@@ -54,7 +54,7 @@ export function UserSettings({ onUserChange }: UserSettingsProps) {
     // Use type assertion to convert SearchUserResult to GitHubUserData
     // Both types represent GitHub user data, just with slightly different optional field handling
     const convertedUser = user as GitHubUserData
-    
+
     setSelectedUser(convertedUser)
     setSearchQuery('')
     setShowResults(false)
