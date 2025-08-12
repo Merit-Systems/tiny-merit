@@ -3,6 +3,7 @@ import { MeritSDK } from '@merit-systems/sdk'
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
 import { MeritContext } from './merit-context'
+import { useStoredApiKey } from './use-stored-api-key'
 
 // Provider props
 interface MeritProviderProps {
@@ -12,10 +13,15 @@ interface MeritProviderProps {
 
 // Provider component
 export function MeritProvider({ children, config = {} }: MeritProviderProps) {
+  const storedApiKey = useStoredApiKey()
+
   const meritConfig: MeritSDKConfig = useMemo(
     () => ({
       apiKey:
-        config.apiKey || import.meta.env.VITE_MERIT_API_KEY || 'your-api-key',
+        config.apiKey ||
+        storedApiKey ||
+        import.meta.env.VITE_MERIT_API_KEY ||
+        'your-api-key',
       baseURL:
         config.baseURL ||
         import.meta.env.VITE_MERIT_BASE_URL ||
@@ -25,7 +31,7 @@ export function MeritProvider({ children, config = {} }: MeritProviderProps) {
         import.meta.env.VITE_MERIT_CHECKOUT_URL ||
         'https://terminal.merit.systems/checkout',
     }),
-    [config.apiKey, config.baseURL, config.checkoutURL]
+    [config.apiKey, config.baseURL, config.checkoutURL, storedApiKey]
   )
 
   const sdk = useMemo(() => {

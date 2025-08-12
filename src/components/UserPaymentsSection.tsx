@@ -26,6 +26,63 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
   const senderGithubId = githubUser.id
   const githubLogin = githubUser.login
 
+  const handleApiError = (err: unknown): string => {
+    // Handle Merit SDK errors by checking properties and error names
+    if (err instanceof Error) {
+      // Check for Merit Error types by name and status
+      const errorName = err.constructor.name
+      const status = (err as any).status
+
+      // Debug logging to see what we're actually getting
+      // console.log('Error details:', {
+      //   name: errorName,
+      //   status: status,
+      //   message: err.message,
+      //   messageLength: err.message.length,
+      //   trimmedMessage: err.message.trim(),
+      //   fullError: err,
+      // })
+
+      // Check for 401 Unauthorized - multiple ways to detect it
+      if (
+        errorName === 'UnauthorizedError' ||
+        status === 401 ||
+        err.message.includes('401') ||
+        err.message.toLowerCase().includes('unauthorized') ||
+        err.message.toLowerCase().includes('invalid api key') ||
+        err.message.toLowerCase().includes('authentication')
+      ) {
+        return 'Invalid API key. Please check your Merit API key in Account Settings.'
+      }
+
+      // Check for MeritError with status 0 or empty message (likely invalid API key causing request to fail)
+      if (errorName === 'MeritError' && (status === 0 || !err.message.trim())) {
+        return 'Invalid API key. Please check your Merit API key in Account Settings.'
+      }
+
+      // Check for 400 Bad Request
+      if (errorName === 'BadRequestError' || status === 400) {
+        return `Bad request: ${err.message}`
+      }
+
+      // Check for 404 Not Found
+      if (errorName === 'NotFoundError' || status === 404) {
+        return `Resource not found: ${err.message}`
+      }
+
+      // Check for 500 Internal Server Error
+      if (errorName === 'InternalServerError' || status >= 500) {
+        return `Server error: ${err.message}`
+      }
+
+      // Generic error message fallback
+      return err.message
+    }
+
+    // console.log('Non-Error object:', err)
+    return 'An unexpected error occurred'
+  }
+
   const refreshPayments = async () => {
     setIsRefreshing(true)
     setError(null)
@@ -38,6 +95,8 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
           setBalance(balanceData)
         } catch (err) {
           console.warn('Could not fetch balance:', err)
+          setError(handleApiError(err))
+          return
         }
       }
 
@@ -52,9 +111,11 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
         setHasNext(sentData.has_next)
       } catch (err) {
         console.warn('Could not fetch sent payments:', err)
+        setError(handleApiError(err))
+        return
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user data')
+      setError(handleApiError(err))
     } finally {
       setIsRefreshing(false)
     }
@@ -73,6 +134,8 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
             setBalance(balanceData)
           } catch (err) {
             console.warn('Could not fetch balance:', err)
+            setError(handleApiError(err))
+            return
           }
         }
 
@@ -87,11 +150,11 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
           setHasNext(sentData.has_next)
         } catch (err) {
           console.warn('Could not fetch sent payments:', err)
+          setError(handleApiError(err))
+          return
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to fetch user data'
-        )
+        setError(handleApiError(err))
       } finally {
         setLoading(false)
       }
@@ -143,91 +206,123 @@ export function UserPaymentsSection({ githubUser }: UserPaymentsSectionProps) {
         </Card>
       )}
 
-      {/* Sent Payments */}
-      <Card className="p-4 flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-between mb-4 flex-shrink-0">
-          <h3 className="font-medium">Recent Sent Payments</h3>
-          <div className="flex items-center gap-3">
-            {totalCount > 0 && (
-              <p className="text-xs text-gray-500">
-                {totalCount} total payments
-              </p>
-            )}
-            <button
-              onClick={refreshPayments}
-              disabled={isRefreshing || loading}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isRefreshing ? (
-                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
+      {/* Sent Payments - Only show if there are payments, an error, or currently loading */}
+      {(sentPayments.length > 0 || error || loading) && (
+        <Card className="p-4 flex-1 flex flex-col min-h-0">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
+            <h3 className="font-medium">Recent Sent Payments</h3>
+            <div className="flex items-center gap-3">
+              {totalCount > 0 && (
+                <p className="text-xs text-gray-500">
+                  {totalCount} total payments
+                </p>
               )}
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
-          </div>
-        </div>
-
-        {sentPayments.length > 0 ? (
-          <>
-            <div className="flex-1 overflow-y-auto">
-              <PaymentGroups payments={sentPayments} />
+              <button
+                onClick={refreshPayments}
+                disabled={isRefreshing || loading}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isRefreshing ? (
+                  <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                )}
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
             </div>
+          </div>
 
-            {/* Pagination Controls */}
-            {totalCount > 20 && (
-              <div className="flex items-center justify-between mt-6 pt-4 border-t flex-shrink-0">
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(1, prev - 1))
-                  }
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>Page {currentPage}</span>
-                  <span>•</span>
-                  <span>
-                    Showing {(currentPage - 1) * 20 + 1}-
-                    {Math.min(currentPage * 20, totalCount)} of {totalCount}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
-                  disabled={!hasNext}
-                  className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next
-                </button>
+          {sentPayments.length > 0 ? (
+            <>
+              <div className="flex-1 overflow-y-auto">
+                <PaymentGroups payments={sentPayments} />
               </div>
-            )}
-          </>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No sent payments found
-          </p>
-        )}
-      </Card>
 
-      {error && (
-        <Card className="p-4 border-red-200 bg-red-50">
-          <p className="text-sm text-red-600">Error: {error}</p>
+              {/* Pagination Controls */}
+              {totalCount > 20 && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t flex-shrink-0">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Previous
+                  </button>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>Page {currentPage}</span>
+                    <span>•</span>
+                    <span>
+                      Showing {(currentPage - 1) * 20 + 1}-
+                      {Math.min(currentPage * 20, totalCount)} of {totalCount}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={!hasNext}
+                    className="px-3 py-2 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {error ? (
+                <div className="flex items-start gap-3 p-4 border border-red-200 bg-red-50 rounded-lg">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="w-5 h-5 text-red-500 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.315 16.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-red-600 font-medium">
+                      {error.includes('Invalid API key')
+                        ? 'Authentication Error'
+                        : error.includes('Bad request')
+                          ? 'Request Error'
+                          : error.includes('Resource not found')
+                            ? 'Not Found'
+                            : error.includes('Server error')
+                              ? 'Server Error'
+                              : 'Error'}
+                    </p>
+                    <p className="text-sm text-red-600 mt-1">{error}</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No sent payments found
+                </p>
+              )}
+            </>
+          )}
         </Card>
       )}
     </div>
