@@ -15,7 +15,7 @@
   "dependencies": {
     "@octokit/rest": "^22.0.0",
     "@radix-ui/react-slot": "^1.2.3",
-    "@rsproule/merit-sdk-test": "^0.1.3",
+    "@merit-systems/sdk": "^0.0.1",
     "autonumeric": "^4.10.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
