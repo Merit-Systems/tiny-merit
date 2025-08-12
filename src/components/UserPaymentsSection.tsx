@@ -133,12 +133,10 @@ export function UserPaymentsSection() {
   }
 
   return (
-    <div className="mt-6 space-y-4">
-      <h2 className="text-lg font-semibold">Your Merit Activity</h2>
-
+    <div className="h-full flex flex-col space-y-4">
       {/* Balance Section */}
-      <Card className="p-6">
-        {balance ? (
+      {balance && (
+        <Card className="p-6">
           <div className="flex items-center gap-4">
             <img
               src={`https://github.com/${balance.login}.png?size=64`}
@@ -160,26 +158,23 @@ export function UserPaymentsSection() {
               <p className="text-sm text-gray-500">Available Balance</p>
             </div>
           </div>
-        ) : githubLogin ? (
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse" />
-            <div>
-              <p className="text-gray-500">Loading your Merit balance...</p>
-            </div>
-          </div>
-        ) : (
+        </Card>
+      )}
+
+      {!balance && !githubLogin && (
+        <Card className="p-6">
           <div className="text-center py-4">
             <p className="text-gray-500 mb-2">Merit Balance</p>
             <p className="text-sm text-gray-400">
               Set VITE_MERIT_SENDER_LOGIN to view your balance
             </p>
           </div>
-        )}
-      </Card>
+        </Card>
+      )}
 
       {/* Sent Payments */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <Card className="p-4 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between mb-4 flex-shrink-0">
           <h3 className="font-medium">Recent Sent Payments</h3>
           <div className="flex items-center gap-3">
             {totalCount > 0 && (
@@ -216,11 +211,13 @@ export function UserPaymentsSection() {
 
         {sentPayments.length > 0 ? (
           <>
-            <PaymentGroups payments={sentPayments} />
+            <div className="flex-1 overflow-y-auto">
+              <PaymentGroups payments={sentPayments} />
+            </div>
 
             {/* Pagination Controls */}
             {totalCount > 20 && (
-              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t flex-shrink-0">
                 <button
                   onClick={() =>
                     setCurrentPage((prev) => Math.max(1, prev - 1))

@@ -19,9 +19,9 @@ export function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
   const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content
 
   return (
-    <div className={className}>
+    <div className={`h-full flex flex-col ${className}`}>
       {/* Tab Headers */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 flex-shrink-0">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => (
             <button
@@ -40,7 +40,7 @@ export function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6">{activeTabContent}</div>
+      <div className="mt-6 flex-1 min-h-0">{activeTabContent}</div>
     </div>
   )
 }
