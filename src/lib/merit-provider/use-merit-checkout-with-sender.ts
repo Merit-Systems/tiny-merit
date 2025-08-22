@@ -18,6 +18,8 @@ export function useMeritCheckoutWithSender(senderGithubId?: number) {
           items,
           groupId: options?.groupId,
           senderGithubId,
+          title: 'Merit Payment',
+          description: 'Pay for a GitHub user or repository',
         })
 
         // Add redirect URL as query parameter if provided
